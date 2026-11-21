@@ -4,16 +4,17 @@
   
   <h2>What the Code Does</h2>
   <ul>
-    <li>Handles local file conversion and processing tasks directly on your machine.</li>
-    <li>Provides a modern user interface for selecting, managing, and converting files.</li>
-    <li>Executes fast and secure file operations using a robust Rust backend.</li>
+    <li>Processes local file conversions and utility tasks directly on your machine without relying on external cloud servers, ensuring full data privacy.</li>
+    <li>Manages file inputs, validations, and user interactions through a responsive frontend interface.</li>
+    <li>Executes fast, memory-efficient file read, write, and transformation operations using a robust Rust systems backend.</li>
+    <li>Exposes secure command bridges between the user interface and native system APIs to handle file system paths seamlessly.</li>
   </ul>
 
   <h2>How It Works Inside the App</h2>
   <ul>
-    <li><b>Frontend UI:</b> The user interacts with a lightweight, responsive interface to select files and choose target formats.</li>
-    <li><b>Inter-Process Communication:</b> When an action is triggered, commands and file paths are securely passed from the interface to the backend via Tauri.</li>
-    <li><b>Rust Backend Processing:</b> Rust performs the heavy file manipulation locally in the background, ensuring high performance, low memory usage, and complete privacy.</li>
+    <li><b>Frontend Interface:</b> The user interacts with a modern desktop window to browse files, select configuration options, and trigger conversion jobs.</li>
+    <li><b>Tauri Bridge &amp; IPC:</b> When an action is initiated, asynchronous commands and file parameters are passed securely from the web-based frontend to the underlying Rust layer via Tauri's inter-process communication bridge.</li>
+    <li><b>Rust Backend Execution:</b> The Rust core receives the requests, manages multi-threaded execution or streams data safely, processes the files on disk, and reports status updates back to the UI in real-time.</li>
   </ul>
 
   <h2>Download &amp; Install</h2>
