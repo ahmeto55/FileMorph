@@ -1,25 +1,21 @@
-<div align="center">
+<div>
   <h1>FileMorph</h1>
-  <p><b>A lightweight, modern desktop file utility built with Tauri v2 and Rust.</b></p>
+  <p><b>A desktop file utility built with Tauri and Rust.</b></p>
   
-  <p>
-    <a href="#-download--install"><b>Download Installers</b></a> •
-    <a href="#-features"><b>Features</b></a> •
-    <a href="#-license"><b>License</b></a>
-  </p>
+  <h2>What the Code Does</h2>
+  <ul>
+    <li>Handles local file conversion and processing tasks directly on your machine.</li>
+    <li>Provides a modern user interface for selecting, managing, and converting files.</li>
+    <li>Executes fast and secure file operations using a robust Rust backend.</li>
+  </ul>
+
+  <h2>How It Works Inside the App</h2>
+  <ul>
+    <li><b>Frontend UI:</b> The user interacts with a lightweight, responsive interface to select files and choose target formats.</li>
+    <li><b>Inter-Process Communication:</b> When an action is triggered, commands and file paths are securely passed from the interface to the backend via Tauri.</li>
+    <li><b>Rust Backend Processing:</b> Rust performs the heavy file manipulation locally in the background, ensuring high performance, low memory usage, and complete privacy.</li>
+  </ul>
+
+  <h2>Download &amp; Install</h2>
+  <p>Grab the ready-to-use Windows setup installers (<code>.msi</code> and <code>.exe</code>) directly from the <a href="../../releases"><b>GitHub Releases</b></a> page.</p>
 </div>
-
-<hr>
-
-<h2>🚀 Download &amp; Install</h2>
-<p>Ready to use FileMorph? You can grab the latest Windows setup installers (<code>.msi</code> and <code>.exe</code>) directly from the <a href="../../releases"><b>GitHub Releases</b></a> page. Just download, install, and run!</p>
-
-<h2>✨ Features</h2>
-<ul>
-  <li>Fast and secure desktop performance powered by Rust.</li>
-  <li>Clean, intuitive modern user interface.</li>
-  <li>Native Windows support.</li>
-</ul>
-
-<h2>📄 License</h2>
-<p>Distributed under the MIT License. See <code>LICENSE</code> for more information.</p>
