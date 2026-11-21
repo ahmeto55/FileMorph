@@ -1,0 +1,35 @@
+﻿cargo :     Blocking waiting for file lock on build directory
+At line:1 char:1
++ cargo check 2>&1 | Out-File -FilePath "cargo_check_output.txt" -Encod ...
++ ~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (    Blocking wa...build directory:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+    Checking webview2-com-sys v0.39.1
+    Checking tao v0.37.3
+   Compiling formatflex v0.1.0 (C:\Users\Ahmet\Documents\FileMorph\FormatFlex\src-tauri)
+error: failed to run custom build command for `formatflex v0.1.0 
+(C:\Users\Ahmet\Documents\FileMorph\FormatFlex\src-tauri)`
+
+Caused by:
+  process didn't exit successfully: `C:\Users\Ahmet\Documents\FileMorph\FormatFlex\src-tauri\target\debug\build\formatf
+lex/fe269d4324d59951\out\build_script_build` (exit code: 1)
+  --- stdout
+  cargo:rerun-if-env-changed=TAURI_CONFIG
+  cargo:rustc-check-cfg=cfg(desktop)
+  cargo:rustc-cfg=desktop
+  cargo:rustc-check-cfg=cfg(mobile)
+  cargo:rerun-if-changed=C:\Users\Ahmet\Documents\FileMorph\FormatFlex\src-tauri\tauri.conf.json
+  cargo:rustc-env=TAURI_ANDROID_PACKAGE_NAME_APP_NAME=app
+  cargo:rustc-env=TAURI_ANDROID_PACKAGE_NAME_PREFIX=com_formatflex
+  cargo:rustc-check-cfg=cfg(dev)
+  cargo:rustc-cfg=dev
+  cargo:PERMISSION_FILES_PATH=C:\Users\Ahmet\Documents\FileMorph\FormatFlex\src-tauri\target\debug\build\formatflex/3f1
+ac7693c76fbec\out\app-manifest\__app__-permission-files
+  cargo:rerun-if-changed=C:\Users\Ahmet\Documents\FileMorph\FormatFlex\src-tauri\capabilities
+  cargo:rerun-if-env-changed=REMOVE_UNUSED_COMMANDS
+  cargo:rustc-env=TAURI_ENV_TARGET_TRIPLE=x86_64-pc-windows-msvc
+  package.metadata does not exist
+  `C:\Users\Ahmet\Documents\FileMorph\FormatFlex\src-tauri\icons/icon.ico` not found; required for generating a 
+Windows Resource file during tauri-build
+warning: build failed, waiting for other jobs to finish...

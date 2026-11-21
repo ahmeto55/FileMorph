@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FileMorph</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --fg: #e6edf3;
+      --accent: #1034a6;
+      --accent-hover: #1e45c7;
+      --muted: #8b949e;
+      --card: #161b22;
+      --border: #30363d;
+      --danger: #f85149;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-size: 2rem;
+      margin: 0;
+      letter-spacing: -0.5px;
+    }
+    .terminal-icon-btn {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--fg);
+      font-size: 1.1rem;
+      padding: 6px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .terminal-icon-btn:hover {
+      background: var(--border);
+      border-color: var(--accent);
+    }
+    .app {
+      width: 100%;
+      max-width: 560px;
+      padding: 2rem;
+    }
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 2.5rem 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      margin: 1.5rem 0;
+      background: var(--card);
+    }
+    .drop-zone.dragover {
+      border-color: var(--accent);
+      background: #111d38;
+    }
+    .drop-zone-text {
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .drop-zone-text strong {
+      color: #3b71ca;
+      font-size: 1.1rem;
+    }
+    .file-info {
+      margin: 1.5rem 0;
+      padding: 1rem 1.25rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      display: none;
+    }
+    .file-info.visible { display: block; }
+    .file-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 0.5rem 0;
+      font-size: 0.95rem;
+    }
+    .file-label { color: var(--muted); }
+    .file-value {
+      color: var(--fg);
+      font-weight: 500;
+      max-width: 340px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .format-select {
+      width: 100%;
+      margin: 0.5rem 0 1.25rem 0;
+      padding: 0.7rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--fg);
+      font-size: 0.95rem;
+      outline: none;
+    }
+    .format-select:focus { border-color: var(--accent); }
+    .format-select:disabled { opacity: 0.5; cursor: not-allowed; }
+    .convert-btn {
+      padding: 0.85rem 1.5rem;
+      background: var(--accent);
+      color: #ffffff;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.2s;
+    }
+    .convert-btn:hover:not(:disabled) { background: var(--accent-hover); }
+    .convert-btn:disabled {
+      background: var(--border);
+      color: var(--muted);
+      cursor: not-allowed;
+    }
+    
+    .history-section {
+      margin-top: 2rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+    }
+    .history-header {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      color: var(--fg);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .clear-history-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-size: 0.8rem;
+      cursor: pointer;
+      padding: 0;
+      transition: color 0.2s;
+    }
+    .clear-history-btn:hover { color: var(--danger); }
+
+    .history-list {
+      max-height: 160px;
+      overflow-y: auto;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .history-item {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .history-item:last-child { border-bottom: none; }
+    .history-details {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      overflow: hidden;
+    }
+    .history-name {
+      color: var(--fg);
+      max-width: 220px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .history-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      white-space: nowrap;
+    }
+    .history-status {
+      color: #3fb950;
+      font-weight: 600;
+    }
+    .delete-file-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.75rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .delete-file-btn:hover {
+      background: rgba(248, 81, 73, 0.15);
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+    .empty-history {
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-style: italic;
+      text-align: center;
+      padding: 0.5rem 0;
+    }
+
+    /* Terminal Console Modal (Theme-matched) */
+    .terminal-modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 200;
+      justify-content: center;
+      align-items: center;
+    }
+    .terminal-modal.visible { display: flex; }
+    .terminal-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      width: 90%;
+      max-width: 600px;
+      height: 380px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+    }
+    .terminal-box-header {
+      padding: 10px 15px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+    }
+    .terminal-close-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    .terminal-close-btn:hover { color: var(--danger); }
+    .terminal-output {
+      padding: 12px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.82rem;
+      color: var(--fg);
+      background: #06090f;
+      overflow-y: auto;
+      flex-grow: 1;
+      white-space: pre-wrap;
+      word-break: break-all;
+      border-bottom-left-radius: 10px;
+      border-bottom-right-radius: 10px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--fg);
+      padding: 0.85rem 1.25rem;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+      display: none;
+      font-size: 0.95rem;
+      z-index: 100;
+    }
+    .toast.visible { display: block; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="header-container">
+      <h1>FileMorph</h1>
+      <button type="button" class="terminal-icon-btn" id="terminalToggleBtn" title="View Conversion Terminal Log">💻</button>
+    </div>
+
+    <!-- Drop Zone -->
+    <div class="drop-zone" id="dropZone">
+      <input type="file" id="fileInput" style="display: none;">
+      <div class="drop-zone-text">
+        📁 <strong>Drag & drop your file here</strong><br>
+        <span style="font-size: 0.85rem;">or click anywhere to browse</span>
+      </div>
+    </div>
+
+    <!-- File Info -->
+    <div class="file-info" id="fileInfo" aria-live="polite">
+      <div class="file-row">
+        <span class="file-label">File Name:</span>
+        <span class="file-value" id="fileName">—</span>
+      </div>
+      <div class="file-row">
+        <span class="file-label">Format:</span>
+        <span class="file-value" id="fileFormat">—</span>
+      </div>
+      <div class="file-row">
+        <span class="file-label">Location:</span>
+        <span class="file-value" id="filePath">—</span>
+      </div>
+    </div>
+
+    <!-- Conversion Target Selector -->
+    <label for="formatSelect" style="display:block; color:var(--muted); font-size: 0.9rem;">Convert to:</label>
+    <select class="format-select" id="formatSelect" disabled>
+      <option value="">Select a file first</option>
+    </select>
+
+    <button type="button" class="convert-btn" id="convertBtn" disabled>Convert</button>
+
+    <!-- Conversion History Log -->
+    <div class="history-section">
+      <div class="history-header">
+        <span>Conversion History</span>
+        <button type="button" class="clear-history-btn" id="clearHistoryBtn">Clear All</button>
+      </div>
+      <ul class="history-list" id="historyList">
+        <li class="empty-history" id="emptyHistory">No conversions yet</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Terminal Console Modal -->
+  <div class="terminal-modal" id="terminalModal">
+    <div class="terminal-box">
+      <div class="terminal-box-header">
+        <span>FileMorph Background Terminal Log</span>
+        <button type="button" class="terminal-close-btn" id="terminalCloseBtn">✕</button>
+      </div>
+      <div class="terminal-output" id="terminalOutput">
+        [System] FileMorph terminal initialized. Ready for background conversions...
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast">
+    <span id="toastMsg"></span>
+  </div>
+
+  <script>
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const fileInfo = document.getElementById('fileInfo');
+    const convertBtn = document.getElementById('convertBtn');
+    const formatSelect = document.getElementById('formatSelect');
+    const toast = document.getElementById('toast');
+    const toastMsg = document.getElementById('toastMsg');
+    const fileNameEl = document.getElementById('fileName');
+    const fileFormatEl = document.getElementById('fileFormat');
+    const filePathEl = document.getElementById('filePath');
+    const historyList = document.getElementById('historyList');
+    const emptyHistory = document.getElementById('emptyHistory');
+    const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+
+    const terminalToggleBtn = document.getElementById('terminalToggleBtn');
+    const terminalModal = document.getElementById('terminalModal');
+    const terminalCloseBtn = document.getElementById('terminalCloseBtn');
+    const terminalOutput = document.getElementById('terminalOutput');
+
+    let selectedFilePath = null;
+    let isBrowsing = false;
+
+    function getTauri() {
+      return window.__TAURI__ || null;
+    }
+
+    function logToTerminal(message) {
+      const timestamp = new Date().toLocaleTimeString();
+      terminalOutput.textContent += `\n[${timestamp}] ${message}`;
+      terminalOutput.scrollTop = terminalOutput.scrollHeight;
+    }
+
+    terminalToggleBtn.addEventListener('click', () => {
+      terminalModal.classList.add('visible');
+    });
+
+    terminalCloseBtn.addEventListener('click', () => {
+      terminalModal.classList.remove('visible');
+    });
+
+    terminalModal.addEventListener('click', (e) => {
+      if (e.target === terminalModal) {
+        terminalModal.classList.remove('visible');
+      }
+    });
+
+    function saveCurrentHistory() {
+      const items = [];
+      document.querySelectorAll('.history-item').forEach(li => {
+        const nameEl = li.querySelector('.history-name');
+        if (nameEl) {
+          const path = nameEl.getAttribute('title') || nameEl.textContent;
+          items.push(path);
+        }
+      });
+      const json = JSON.stringify(items);
+      const tauri = getTauri();
+      if (tauri && tauri.core) {
+        tauri.core.invoke('save_history', { data: json }).catch(
+          err => console.error('Save history error:', err)
+        );
+      }
+    }
+
+    dropZone.addEventListener('click', async () => {
+      if (isBrowsing) return;
+      isBrowsing = true;
+
+      const tauri = getTauri();
+      if (tauri && tauri.dialog) {
+        try {
+          const selected = await tauri.dialog.open({ multiple: false, directory: false });
+          if (selected) {
+            handleFilePath(selected);
+          }
+        } catch (err) {
+          console.error('Tauri dialog error, falling back to input:', err);
+          fileInput.click();
+        }
+      } else {
+        fileInput.click();
+      }
+
+      setTimeout(() => {
+        isBrowsing = false;
+      }, 500);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const fullPath = file.path || file.name;
+        handleFilePath(fullPath);
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      const tauri = getTauri();
+      if (tauri && tauri.event) {
+        try {
+          await tauri.event.listen('tauri://drag-enter', () => dropZone.classList.add('dragover'));
+          await tauri.event.listen('tauri://drag-leave', () => dropZone.classList.remove('dragover'));
+          await tauri.event.listen('tauri://drag-drop', (event) => {
+            dropZone.classList.remove('dragover');
+            const paths = event.payload && event.payload.paths;
+            if (paths && paths.length > 0) handleFilePath(paths[0]);
+          });
+
+          // Listen for live streamed progress logs from Rust background thread
+          await tauri.event.listen('terminal-log', (event) => {
+            logToTerminal(event.payload);
+          });
+        } catch (e) {
+          console.error('Events setup error:', e);
+        }
+      }
+
+      // Load persisted conversion history
+      if (tauri && tauri.core) {
+        try {
+          const saved = await tauri.core.invoke('load_history');
+          const items = JSON.parse(saved);
+          historyList.innerHTML = '';
+          if (items.length === 0) {
+            checkEmptyHistory();
+          } else {
+            items.forEach(path => {
+              const parts = path.split(/[/\\]/);
+              const name = parts[parts.length - 1] || path;
+              const li = document.createElement('li');
+              li.className = 'history-item';
+              li.innerHTML = `
+                <div class="history-details">
+                  <span class="history-name" title="${path}">${name}</span>
+                </div>
+                <div class="history-actions">
+                  <span class="history-status">Success</span>
+                  <button type="button" class="delete-file-btn" title="Delete converted file from disk">Delete File</button>
+                </div>
+              `;
+              li.querySelector('.delete-file-btn').addEventListener('click', async () => {
+                const tauri = getTauri();
+                try {
+                  if (tauri && tauri.core) {
+                    await tauri.core.invoke('delete_file', { path });
+                  }
+                  li.remove();
+                  checkEmptyHistory();
+                  saveCurrentHistory();
+                  showToast('Converted file deleted.');
+                  logToTerminal(`Deleted file from disk: ${path}`);
+                } catch (err) {
+                  console.error('Delete error:', err);
+                  showToast(`Failed to delete file: ${err}`);
+                  logToTerminal(`ERROR deleting file: ${err}`);
+                }
+              });
+              historyList.prepend(li);
+            });
+            checkEmptyHistory();
+          }
+          logToTerminal("Loaded conversion history from disk.");
+        } catch (err) {
+          console.error('Load history error:', err);
+          checkEmptyHistory();
+        }
+      }
+    });
+
+    window.addEventListener('dragover', (e) => e.preventDefault());
+    window.addEventListener('drop', (e) => e.preventDefault());
+
+    async function handleFilePath(fullPath) {
+      selectedFilePath = fullPath;
+      const parts = fullPath.split(/[/\\]/);
+      const name = parts[parts.length - 1] || fullPath;
+      const extIndex = name.lastIndexOf('.');
+      const ext = extIndex > 0 ? name.slice(extIndex + 1).toLowerCase() : '';
+
+      fileNameEl.textContent = name;
+      fileFormatEl.textContent = ext ? `.${ext.toUpperCase()}` : 'Unknown';
+      filePathEl.textContent = fullPath;
+      filePathEl.title = fullPath;
+      fileInfo.classList.add('visible');
+
+      logToTerminal(`Loaded file: ${fullPath} (Extension: .${ext})`);
+      await populateFormatDropdown(ext);
+    }
+
+    async function populateFormatDropdown(ext) {
+      const tauri = getTauri();
+      if (!tauri || !tauri.core) return;
+
+      formatSelect.disabled = true;
+      convertBtn.disabled = true;
+      formatSelect.innerHTML = '<option value="">Analyzing file...</option>';
+
+      try {
+        const formats = await tauri.core.invoke('analyze_file', { extension: ext || null, mimeType: null });
+        formatSelect.innerHTML = '';
+        if (!formats || formats.length === 0) {
+          formatSelect.innerHTML = '<option value="">No supported formats</option>';
+          logToTerminal(`No supported conversion formats found for extension .${ext}`);
+          return;
+        }
+
+        formats.forEach((f) => {
+          const opt = document.createElement('option');
+          opt.value = f;
+          opt.textContent = f.toUpperCase();
+          formatSelect.appendChild(opt);
+        });
+
+        formatSelect.disabled = false;
+        convertBtn.disabled = false;
+        logToTerminal(`Analyzed format successfully. Available targets: ${formats.join(', ').toUpperCase()}`);
+      } catch (err) {
+        console.error('Analyze error:', err);
+        formatSelect.innerHTML = '<option value="">Error loading formats</option>';
+        logToTerminal(`ERROR analyzing file: ${err}`);
+      }
+    }
+
+    async function performConversion() {
+      const targetFormat = formatSelect.value;
+      if (!targetFormat || !selectedFilePath) return;
+
+      const tauri = getTauri();
+      convertBtn.disabled = true;
+      showToast(`Converting to ${targetFormat.toUpperCase()}...`);
+      logToTerminal(`Initiating asynchronous conversion request to ${targetFormat.toUpperCase()}...`);
+
+      try {
+        const outputPath = await tauri.core.invoke('convert_file', {
+          path: selectedFilePath,
+          targetFormat: targetFormat
+        });
+
+        showToast('Conversion complete!');
+        addHistoryItem(outputPath, targetFormat);
+        saveCurrentHistory();
+        logToTerminal(`Conversion successful! Saved output to: ${outputPath}`);
+      } catch (err) {
+        console.error('Conversion error:', err);
+        showToast(`Conversion failed: ${err}`);
+        logToTerminal(`CONVERSION FAILED: ${err}`);
+      } finally {
+        convertBtn.disabled = false;
+      }
+    }
+
+    function addHistoryItem(outputPath, targetFormat) {
+      if (document.getElementById('emptyHistory')) {
+        document.getElementById('emptyHistory').remove();
+      }
+
+      const parts = outputPath.split(/[/\\]/);
+      const name = parts[parts.length - 1] || outputPath;
+
+      const li = document.createElement('li');
+      li.className = 'history-item';
+      li.innerHTML = `
+        <div class="history-details">
+          <span class="history-name" title="${outputPath}">${name}</span>
+        </div>
+        <div class="history-actions">
+          <span class="history-status">Success</span>
+          <button type="button" class="delete-file-btn" title="Delete converted file from disk">Delete File</button>
+        </div>
+      `;
+
+      li.querySelector('.delete-file-btn').addEventListener('click', async () => {
+        const tauri = getTauri();
+        try {
+          if (tauri && tauri.core) {
+            await tauri.core.invoke('delete_file', { path: outputPath });
+          }
+          li.remove();
+          checkEmptyHistory();
+          saveCurrentHistory();
+          showToast('Converted file deleted.');
+          logToTerminal(`Deleted file from disk: ${outputPath}`);
+        } catch (err) {
+          console.error('Delete error:', err);
+          showToast(`Failed to delete file: ${err}`);
+          logToTerminal(`ERROR deleting file: ${err}`);
+        }
+      });
+
+      historyList.prepend(li);
+    }
+
+    function checkEmptyHistory() {
+      if (historyList.children.length === 0) {
+        const emptyLi = document.createElement('li');
+        emptyLi.className = 'empty-history';
+        emptyLi.id = 'emptyHistory';
+        emptyLi.textContent = 'No conversions yet';
+        historyList.appendChild(emptyLi);
+      }
+    }
+
+    clearHistoryBtn.addEventListener('click', () => {
+      historyList.innerHTML = '';
+      checkEmptyHistory();
+      saveCurrentHistory();
+      logToTerminal("Cleared all conversion history logs.");
+    });
+
+    function showToast(message) {
+      toastMsg.textContent = message;
+      toast.classList.add('visible');
+      setTimeout(() => toast.classList.remove('visible'), 3000);
+    }
+
+    convertBtn.addEventListener('click', performConversion);
+
+    // Disable default right-click context menu (Inspect, Reload, etc.)
+    document.addEventListener('contextmenu', e => e.preventDefault());
+  </script>
+</body>
+</html>
